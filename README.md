@@ -5,23 +5,14 @@ This example is using a Local Calendar to store Alarm Events and then have them 
 Create an Integration 'Local calendar' named 'HA Calendar'
 
 ## Externalize Timer Ringing in your VA-pes' script
-Take control of your VA-pes and modify the switch 'Timer Ringing'.  There are different ways to do this.  For me, I copied the package yaml locally and modified it.
+Take control of your VA-pes and modify the switch 'Timer Ringing'.  There are different ways to do this.  
+below is a recommendation by @jesserockz, after you take control, just add this to the bottom of the yaml.
 
-This is what my packages section looks like:
 ```
-packages:
-  va: !include common/home-assistant-voice.yaml
-  #Nabu Casa.Home Assistant Voice PE: github://esphome/home-assistant-voice-pe/home-assistant-voice.yaml
-```
-This is what my switch section looks like:
-```
-...
-  - platform: template
-    id: timer_ringing
-    name: "Timer Ringing"
-    optimistic: true
+switch:
+  - id: !extend timer_ringing
+    name: Timer Ringing
     internal: false
-...
 ```
 ## Setup Timer Ringing switch
 First, I hid each Timer Ringing switch.
