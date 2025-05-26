@@ -1,0 +1,52 @@
+alias: Alarm-Set
+description: ""
+triggers:
+  - command:
+      - Set [an|the] Alarm (at|to|for) {time}
+    trigger: conversation
+conditions: []
+actions:
+  - variables:
+      strampm: >-
+        {{iif(trigger.slots.time is search('p.m',
+        ignorecase=True),12,iif(trigger.slots.time is search('pm',
+        ignorecase=True),12.0,0.0,0.0),0)}}
+  - variables:
+      strftime1: >-
+        {{trigger.slots.time.split(' ')[0]|regex_replace(find=':', replace='.',
+        ignorecase=True)|float}}
+  - variables:
+      strftime2: >-
+        {{iif(strftime1|float > 99,strftime1|float / 100.0, strftime1,
+        strftime1)}}
+  - variables:
+      strftime: "{{strftime2|float + strampm|float}}"
+  - variables:
+      strdtime: >-
+        Time{{'{:.2f}'.format(strftime)|regex_replace(find='[.]', replace=':',
+        ignorecase=True)}}
+  - variables:
+      strdeltahours: >-
+        {{iif(now() > today_at(strdtime|regex_replace(find='Time', replace='',
+        ignorecase=True)),24,0,0)}}
+  - variables:
+      strdatetime: >-
+        {{today_at(strdtime|regex_replace(find='Time', replace='',
+        ignorecase=True)) + timedelta( hours = strdeltahours|int)}}
+  - variables:
+      strdatetimep1: >-
+        {{today_at(strdtime|regex_replace(find='Time', replace='',
+        ignorecase=True)) + timedelta( hours = strdeltahours|int, minutes = 1)}}
+  - action: calendar.create_event
+    metadata: {}
+    data:
+      summary: Alarm
+      description: "{{trigger.device_id}}"
+      start_date_time: "{{strdatetime}}"
+      end_date_time: "{{strdatetimep1}}"
+    target:
+      entity_id: calendar.ha_calendar
+  - set_conversation_response: >-
+      Calendar Event Alarm Set in HA Calendar for
+      {{as_datetime(strdatetime).strftime('%A %I:%M %p')}}
+mode: single

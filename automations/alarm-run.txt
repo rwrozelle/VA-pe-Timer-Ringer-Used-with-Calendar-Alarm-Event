@@ -1,0 +1,26 @@
+alias: Alarm-Run
+description: ""
+triggers:
+  - event: start
+    offset: "0:00:00"
+    entity_id: calendar.ha_calendar
+    trigger: calendar
+conditions: []
+actions:
+  - action: media_player.turn_on
+    metadata: {}
+    data: {}
+    target:
+      device_id: "{{trigger.calendar_event.description}}"
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+  - action: switch.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: >-
+        {{ area_entities(area_id(trigger.calendar_event.description)) |
+        select('is_state_attr', 'friendly_name', 'Timer Ringing') | first() }}
+mode: single
